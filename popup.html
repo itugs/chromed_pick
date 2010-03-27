@@ -31,7 +31,11 @@ function init() {
 				var list = data["result"]["items"];
 
 				for( var i = 0 ; i < list.length; i++) {
-					addPost(list[i]);
+					try {
+						addPost(list[i]);
+					} catch(e) {
+						debug(e);
+					}
 				}
 			}
 		});
@@ -39,13 +43,27 @@ function init() {
 
 function addPost(post) {
 
-	var postContent = "";
+	var postContent = "<img src='" + post["userProfileImageUrl"] + "' alt='"+post["userNick"]+"' class='profile'  />";
 
 	var div = document.createElement("div");
 
 	var displayPost = extractDisplayPost(post);
 
-	postContent = "<img src='" + post["userProfileImageUrl"] + "' alt='"+post["userNick"]+"' class='profile'  />" + displayPost["postText"];
+	if(displayPost["media"]["mediaThumbnailUrl80x80"]) {
+		postContent += "<img src='" + displayPost["media"]["mediaThumbnailUrl80x80"] + "' width='80' height='80' id='mediaImage' />";
+	}
+
+	if(displayPost["mainText"]) {
+		postContent += "<div id='mainText'>" + displayPost["mainText"] + "</div>";
+	}
+
+	if(displayPost["subText"]) {
+		postContent += "<div id='subText'>" + displayPost["subText"] + "</div>";
+	}
+
+	if(displayPost["sourceUserNick"]) {
+		postContent += "<div id='sourceUserNick'>by " + displayPost["sourceUserNick"] + "</div>";
+	}
 
 	div.innerHTML = postContent;
 
@@ -56,10 +74,19 @@ function extractDisplayPost(post) {
 
 	var isFromSource = post["sourcePost"] ? true : false;
 
-	var postText = isFromSource ? post["sourcePost"]["postText"] : post["postText"]
+	var sourceUserNick = (isFromSource) ? post["sourcePost"]["userNick"] : "";
+
+	var mainText = isFromSource ? post["sourcePost"]["postText"] : post["postText"];
+	var subText = isFromSource ? post["postText"] : "";
+
+	if(mainText == "") {
+		mainText = subText;
+		subText = "";
+	}
+
 	var media =  isFromSource ? post["sourcePost"]["media"]: post["media"];
 
-	return {"postText": postText, "media": media};
+	return {"isFromSource": isFromSource, "mainText": mainText, "subText": subText, "media": media, "sourceUserNick": sourceUserNick};
 }
 </script>
 </head>

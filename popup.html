@@ -1,34 +1,71 @@
-<script>
-var req = new XMLHttpRequest();
-req.open(
-    "GET",
-    "http://api.flickr.com/services/rest/?" +
-        "method=flickr.photos.search&" +
-        "api_key=90485e931f687a9b9c2a66bf58a3861a&" +        "text=hello%20world&" +
-        "safe_search=1&" +  // 1 is "safe"
-        "content_type=1&" +  // 1 is "photos only"
-        "sort=relevance&" +  // another good one is "interestingness-desc"
-        "per_page=20",
-    true);
-req.onload = showPhotos;
-req.send(null);
-
-function showPhotos() {
-  var photos = req.responseXML.getElementsByTagName("photo");
-
-  for (var i = 0, photo; photo = photos[i]; i++) {
-    var img = document.createElement("image");
-    img.src = constructImageURL(photo);
-    document.body.appendChild(img);
-  }
+<html>
+<head>
+<style>
+body {
+	min-width: 400px;
+	color: #000000;
 }
 
-// See: http://www.flickr.com/services/api/misc.urls.html
-function constructImageURL(photo) {
-  return "http://farm" + photo.getAttribute("farm") +
-      ".static.flickr.com/" + photo.getAttribute("server") +
-      "/" + photo.getAttribute("id") +
-      "_" + photo.getAttribute("secret") +
-      "_s.jpg";
+img.profile {
+	width: 60px;
+	height: 60px;
+}
+</style>
+<script type="text/javascript" src="lib/3rdparty/jquery.js"></script>
+<script type="text/javascript">
+
+function debug(msg) {
+	$("#msg")[0].innerHTML = msg;
+}
+
+function init() {
+
+	$.ajax({
+		url: "http://pick.naver.jp/api/post/list/mainboard/1/10", 
+		beforeSend: function(req) {
+			req.setRequestHeader("Accept", "application/json");
+		},
+		dataType : "json",
+		success: function(data) {
+
+				var list = data["result"]["items"];
+
+				for( var i = 0 ; i < list.length; i++) {
+					addPost(list[i]);
+				}
+			}
+		});
+}
+
+function addPost(post) {
+
+	var postContent = "";
+
+	var div = document.createElement("div");
+
+	var displayPost = extractDisplayPost(post);
+
+	postContent = "<img src='" + post["userProfileImageUrl"] + "' alt='"+post["userNick"]+"' class='profile'  />" + displayPost["postText"];
+
+	div.innerHTML = postContent;
+
+	$("#posts")[0].appendChild(div);
+}
+
+function extractDisplayPost(post) {
+
+	var isFromSource = post["sourcePost"] ? true : false;
+
+	var postText = isFromSource ? post["sourcePost"]["postText"] : post["postText"]
+	var media =  isFromSource ? post["sourcePost"]["media"]: post["media"];
+
+	return {"postText": postText, "media": media};
 }
 </script>
+</head>
+<body onload="init()">
+<pre id="msg"></pre>
+<div id="posts">
+</div>
+</body>
+</html>

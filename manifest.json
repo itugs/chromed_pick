@@ -1,7 +1,7 @@
 {
 	"name": "My First Extension",
-	"version": "1.0",
-	"description": "The first extension that I made.",
+	"version": "1.0.0",
+	"description": "Chrome Pick is a Pick(Naver Japan) extension.",
 	"browser_action": {
 		"default_icon": "icon.ico",
 		"popup": "popup.html"
